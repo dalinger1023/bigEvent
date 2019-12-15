@@ -46,6 +46,8 @@
 
 </body>
 <script src="./js/jquery-1.12.4.min.js"></script>
+<script src="./tools/config.js"></script>
+<script src="./tools/user.js"></script>
 <script>
     //获取元素
     var $ipt_txt = $('.input_txt');
@@ -56,30 +58,50 @@
         // 3.1 获取输入框内容
         var username = $ipt_txt.val().trim();
         var password = $ipt_pass.val().trim();
+        console.log(username, password);
+
         // 3.2 判断文本框内容
         if (username === "" || password === "") {
             return alert('请填写完成的登录信息,谢谢!');
         }
 
         // 4 如果内容有效,就通过ajax把内容发送给指定接口
-        $.ajax({
-            type: 'post',
-            url: LOGIN,
-            data: {
+        //  4.1 了方便后期维护,请求相关的信息,都放在user.js
+        user.login(
+            {
                 user_name: username,
-                password: password,
+                password: password
             },
-            // 5 接收响应的内容
-            success: function (res) {
+            function (res) {
+                console.log(res);
+
                 // 5.1 响应成功--跳转到index.html
                 if (res.code === 200) {
                     location.href = './index.html';
                 } else {
-                    // 5.2 响应失败--弹框提示
+                    // 5.2 响应失败--弹框提示(优化模态框)
                     alert('用户名或密码错误');
+
                 }
-            }
-        })
+            })
+        // $.ajax({
+        //     type: 'post',
+        //     url: LOGIN,
+        //     data: {
+        //         user_name: username,
+        //         password: password,
+        //     },
+        //     // 5 接收响应的内容
+        //     success: function (res) {
+        //         // 5.1 响应成功--跳转到index.html
+        //         if (res.code === 200) {
+        //             location.href = './index.html';
+        //         } else {
+        //             // 5.2 响应失败--弹框提示
+        //             alert('用户名或密码错误');
+        //         }
+        //     }
+        // })
     })
 
 
