@@ -67,23 +67,21 @@
 
         // 4 如果内容有效,就通过ajax把内容发送给指定接口
         //  4.1 了方便后期维护,请求相关的信息,都放在user.js
-        user.login(
-            {
+        user.login({
+            data: {
                 user_name: username,
                 password: password
             },
-            function (res) {
+            success: function (res) {
                 console.log(res);
-
                 // 5.1 响应成功--跳转到index.html
-                if (res.code === 200) {
-                    location.href = './index.html';
-                } else {
-                    // 5.2 响应失败--弹框提示(优化模态框)
-                    alert('用户名或密码错误');
-
-                }
-            })
+                location.href = './index.html';
+            },
+            fail: function () {
+                // 5.2 响应失败--弹框提示(优化模态框)
+                alert('用户名或密码错误');
+            }
+        })
         // $.ajax({
         //     type: 'post',
         //     url: LOGIN,
