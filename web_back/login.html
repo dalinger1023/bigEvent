@@ -9,6 +9,8 @@
     <link rel="stylesheet" type="text/css" href="css/reset.css">
     <link rel="stylesheet" type="text/css" href="css/iconfont.css">
     <link rel="stylesheet" type="text/css" href="css/main.css">
+    <link rel="stylesheet" href="./js/bootstrap/css/bootstrap.min.css">
+    <!-- 注意:这样引入js文件是有错误的 <link rel="stylesheet" href="./js/bootstrap/js/bootstrap.min.js"> -->
 </head>
 
 <body>
@@ -45,7 +47,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-default" data-dismiss="modal">确认</button>
-                    <button type="button" class="btn btn-primary">Save changes</button>
+                    <!-- <button type="button" class="btn btn-primary">Save changes</button> -->
                 </div>
             </div>
         </div>
@@ -67,6 +69,8 @@
 
 </body>
 <script src="./js/jquery-1.12.4.min.js"></script>
+<!-- 引入模态框的js文件 -->
+<script src="./js/bootstrap/js/bootstrap.min.js"></script>
 <script src="./tools/config.js"></script>
 <script src="./tools/user.js"></script>
 <script>
@@ -83,7 +87,10 @@
 
         // 3.2 判断文本框内容
         if (username === "" || password === "") {
-            return alert('请填写完成的登录信息,谢谢!');
+            // return alert('请填写完成的登录信息,谢谢!');
+            // 模态框优化
+            $('#myModal').modal('show').find('.modal-body').text('请填写完成的登录信息,谢谢!');
+            return;
         }
 
         // 4 如果内容有效,就通过ajax把内容发送给指定接口
@@ -100,7 +107,9 @@
             },
             fail: function () {
                 // 5.2 响应失败--弹框提示(优化模态框)
-                alert('用户名或密码错误');
+                // alert('用户名或密码错误');
+                $('#myModal').modal('show').find('.modal-body').text('用户名或密码错误');
+
             }
         })
         // $.ajax({
