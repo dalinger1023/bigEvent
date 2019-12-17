@@ -9,4 +9,10 @@ var BASE_URL = 'http://localhost:8000/';
 var LOGIN = BASE_URL + 'admin/login';//登录
 var LOGOUT = BASE_URL + 'admin/logout';//退出
 var GETUSER = BASE_URL + 'admin/getuser';//获取用户信息
-var GETCATE = BASE_URL + 'admin/category_search';//获取用户信息
+
+
+
+var GETCATE = BASE_URL + 'admin/category_search';//文章分类获取
+var ADDCATE = BASE_URL + 'admin/category_add';//新增文章分类
+var EDITCATE = BASE_URL + 'admin/category_edit';//编辑文章分类
+var DELCATE = BASE_URL + 'admin/category_delete';//删除文章分类
