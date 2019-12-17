@@ -9,3 +9,4 @@ var BASE_URL = 'http://localhost:8000/';
 var LOGIN = BASE_URL + 'admin/login';//登录
 var LOGOUT = BASE_URL + 'admin/logout';//退出
 var GETUSER = BASE_URL + 'admin/getuser';//获取用户信息
+var GETCATE = BASE_URL + 'admin/category_search';//获取用户信息
