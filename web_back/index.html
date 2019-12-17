@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 
 <head>
     <meta charset="UTF-8">
@@ -150,6 +150,40 @@
         })
     </script>
 
+    <!-- 
+加载用户信息(图片和姓名)
+------------------------
+1 页面加载就向服务器接口请求信息
+2 把获得的响应信息展示在页面上(图片+用户名)
+ -->
+    <script>
+        //把ajax请求 和 地址 信息封装到user.js 和 config.js 中,再调用
+        user.getUser({
+            success: function (data) {
+                //获取左边和右上角的img元素(修改src属性),展示图片
+                $('.user_info img,.user_center_link img').prop('src', data.user_pic);
+                //获取左边的用户名标签元素,修改展示的文本内容;
+                $('.user_info span').html('欢迎&nbsp;&nbsp;' + data.nickname);
+            }
+        });
+
+
+        // //原版写法------------------需要把ajax请求 和 地址 信息封装到user.js 和 config.js 中
+        // $.ajax({
+        //     type: 'get',
+        //     url: 'http://localhost:8000/admin/getuser',
+        //     success: function (res) {
+        //         if (res.code === 200) {
+        //             console.log(res);
+
+        //             //获取左边和右上角的img元素(修改src属性),展示图片
+        //             $('.user_info img,.user_center_link img').prop('src', res.data.user_pic);
+        //             //获取左边的用户名标签元素,修改展示的文本内容;
+        //             $('.user_info span').html('欢迎&nbsp;&nbsp;' + res.data.nickname);
+        //         }
+        //     }
+        // })
+    </script>
 
 </body>
 

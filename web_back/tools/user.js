@@ -34,4 +34,19 @@ var user = {
         })
     },
 
+    //添加[获取用户信息]功能
+    getUser: function (options) {
+        $.ajax({
+            type: 'get',
+            url: GETUSER,
+            success: function (res) {
+                if (res.code === 200) {
+                    options.success(res.data);
+                }
+            }
+        })
+    }
+
+
+
 }
