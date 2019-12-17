@@ -141,6 +141,15 @@
             }
         })
     })
+
+
+    // -------------本地图片预览(修改头像)--------------
+    //1.给长传图片的input标签,添加change事件:
+    $('#user_pic').on('change', function () {
+        console.log($(this)[0].files);//files是DOM元素的属性
+        console.log(URL.createObjectURL($(this)[0].files[0]));//浏览器的一个对象URL的方法,实时监控用户上传的文件的文件地址并且做加密处理
+        $('#avatar').prop('src', URL.createObjectURL($(this)[0].files[0]));
+    });
 </script>
 
 </html>
