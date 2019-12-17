@@ -90,6 +90,8 @@
                 </div>
                 <div class="modal-body">
                     <form>
+                        <!-- 为方便编辑时,方便seralize()提交id信息,设置隐藏域，用于保存id -->
+                        <input type="hidden" id="hidden" name="id">
                         <div class="form-group">
                             <label for="recipient-name" class="control-label">分类名称:</label>
                             <input name='name' id='name' type="text" class="form-control" id="recipient-name">
@@ -103,6 +105,7 @@
                 <div class="modal-footer">
                     <button type="button" class="btn btn-default" id="modal_shutoff">关闭</button>
                     <button type="button" class="btn btn-primary" id="modal_add">新增</button>
+                    <button type="button" style="display: none;" class="btn btn-primary" id="modal_edit">提交编辑</button>
                 </div>
             </div>
         </div>
@@ -146,9 +149,9 @@
             <td>{{val.name}}</td>
             <td>{{val.slug}}</td>
             <td class="text-center">
-                <a href="javascript:editTr({&quot;id&quot;:&quot;4&quot;,&quot;slug&quot;:&quot;travel&quot;,&quot;name&quot;:&quot;爱旅行&quot;});"
-                    class="btn btn-info btn-xs">编辑</a>
-                <a href="javascript:deleteTr( 4 );" class="btn btn-danger btn-xs">删除</a>
+                <a href="javascript:;" data-id="{{val.id}}"
+                    class="btn btn-info btn-xs" id="edit">编辑</a>
+                <a href="javascript:;" data-id="{{val.id}}" class="btn btn-danger btn-xs del_cate">删除</a>
             </td>
         </tr>
         {{/each}}
@@ -180,10 +183,13 @@
         // })
 
     </script>
+
+    <!--  ---------新增分类-------- -->
     <script>
-        //---------------------新增分类--------
         // 点击按钮注册点击事件
         $('#modal_add').on('click', function () {
+            console.log(1);
+
             // 获取并检测文本框内容是否有效
             var nameVal = $('#name').val().trim();
             var slugVal = $('#slug').val().trim();
@@ -198,7 +204,11 @@
                 data: $('form').serialize(),//获取表单元素的内容(此时必须给表单元素添加name属性)
                 success: function (res) {
                     if (res.code === 200) {
+                        console.log(res);
+
                         location.reload();//刷新页面,获取新数据并展示
+                    } else if (res.code == 400) {
+                        alert('您提交的[分类]之前已创建过,不能再次提交,请检查~')
                     }
                 }
             })
@@ -212,6 +222,94 @@
             $('form')[0].reset();
             //让模态框隐藏
             $('#addModal').modal('hide');
+        })
+    </script>
+
+    <!-- --------------------编辑分类-------------- -->
+    <!-- 
+    3 文章分类编辑功能
+          - 编辑和新增使用的是同一个模态框
+            - 在DOM结构的模态框中,在[新增]旁边,新增一个[提交编辑]按钮，用来进行编辑操作,点击[新增]，[提交编辑]按钮是隐藏的(用行内属性设置)
+            - 在DOM结构模态框中设置[input隐藏域]，用来[保存编辑的id]
+            - 为了方便获取[编辑]按钮，为其添加了id名[edit]
+            - 为了点击按钮时,获取对应的id,可以在template创建结构时添加[data-id属性]保存对应id在[编辑]和[删除]按钮上
+
+          - 点击表格中的[编辑]按钮,注册点击事件
+            - 编辑按钮时动态创建的,需要事件委托给tbody
+            - 模态框显示,模态框中的[新增]按钮隐藏
+            - 获取到[数据的id],获取自定义[data-id属性]
+        
+          - 点击[提交编辑]，检测内容并发送请求
+     -->
+    <script>
+        $('tbody').on('click', '#edit', function () {
+            //让模态框显示
+            $('#addModal').modal('show');
+            //让模态框的[提交编辑]按钮显示
+            $('#modal_edit').show();
+            //让模态框的[新增]按钮隐藏 
+            $('#modal_add').hide();
+
+            //获取当前点击的这个[编辑]按钮的自定义属性值data-id
+            var id = $(this).data('id');
+            //把获取的id值给到[隐藏域]的input标签的value中,以便后续提交给指定接口
+            $('#hidden').val(id);
+
+            //把点击的这一行的表格中对应的[name]和[slug]值放在模态框中,以便用户修改编辑
+            //先获取[编辑]按钮的父级元素tr[当前行],[当前行]的[亲儿子有三个td]
+            var $tds = $(this).parents('tr').children();
+            console.log($tds.eq(0).text());
+
+            //把第一个td元素的text值[name],给模态框的对应input标签显示,方便用户编辑修改
+            $('#name').val($tds.eq(0).text());
+            $('#slug').val($tds.eq(1).text());
+        });
+
+        //点击[提交编辑]，获取内容,检测内容并发送ajax请求
+        $('#modal_edit').on('click', function () {
+            //获取表单元素,并检测
+            if (
+                $('#hidden').val().trim() === '' ||
+                $('#name').val().trim() === '' ||
+                $('#slug').val().trim() === ''
+            ) {
+                alert('信息不能为空,请填写完整的信息');
+                return;
+            }
+
+            $.ajax({
+                type: 'post',
+                url: 'http://localhost:8000/admin/category_edit',
+                data: $('form').serialize(),
+                success: function (res) {
+                    if (res.code === 200) {
+                        location.reload();
+                    } else {
+                        alert('网络开小差了,请稍后再试~');
+                    }
+                }
+            })
+        })
+    </script>
+
+    <!-- -----------------文章分类的删除功能-------------- -->
+    <script>
+        //1 点击删除按钮,注册点击事件,因为是动态创建的元素,事件委托给父元素(tbody)
+        $('tbody').on('click', '.del_cate', function () {
+            //2 点击后,获取当前点击的[删除]按钮的自定义属性[data-id]的值
+            var id = $(this).data('id');
+            //3 把获取的id值作为请求参数,发送ajax请求
+            $.ajax({
+                type: 'post',
+                url: 'http://localhost:8000/admin/category_delete',
+                data: { id: id },
+                success: function (res) {
+                    if (res.code === 200) {
+                        //删除成功就刷新页面,显示最新的数据
+                        location.reload();
+                    }
+                }
+            })
         })
     </script>
 
