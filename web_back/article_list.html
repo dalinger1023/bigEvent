@@ -21,20 +21,29 @@
         <div class="container-fluid common_con">
             <div class="row opt_btns">
                 <div class="col-xs-6">
+                    <!-- 筛选功能表单域 -->
                     <form class="form-inline">
+                        <!-- 文章分类筛选框,内部的option标签的值应该利用后台的数据进行创建 -->
                         <select id="selCategory" name="" class="form-control input-sm">
-                            <option>所有分类</option>
-                            <option>未分类</option>
+                            <!-- 
+                        注意:[所有分类],不需要创建,但是需要添加value='';
+                        [其他分类]需要用template模板进行创建,同时设置value=id,因为下拉菜单提交时是获取option的value值,进行提交,如果没有value就提交中间的文本作为查询参数,参数要求查询[所有分类]的文章是查不到的
+                         -->
+                            <option value="">所有分类</option>
+                            <!-- <option>未分类</option>
                             <option>奇趣事</option>
                             <option>会生活</option>
-                            <option>爱旅行</option>
+                            <option>爱旅行</option> -->
                         </select>
+                        <!-- 文章状态筛选的下拉菜单 -->
                         <select id="selStatus" name="" class="form-control input-sm">
-                            <option>所有状态</option>
-                            <option value="drafted">草稿</option>
-                            <option value="published">已发布</option>
+                            <option value="">所有状态</option>
+                            <!-- 因为接口文档要求的参数值为中文,所以这个的value可以改为中文,也可以不写删除 -->
+                            <option value="草稿">草稿</option>
+                            <option value="已发布">已发布</option>
                         </select>
-                        <button id="btnSearch" class="btn btn-default btn-sm">筛选</button>
+                        <!-- 筛选按钮,设置type为button,阻止默认跳转页面的行为,不写默认为submit-->
+                        <button type="button" id="btnSearch" class="btn btn-default btn-sm">筛选</button>
                     </form>
                 </div>
                 <div class="col-xs-6">
@@ -244,7 +253,7 @@
             </table>
 
             <div class="row text-center">
-                <ul class="pagination pagination-sm">
+                <ul class="pagination pagination-sm" id='pagination-demo'>
                     <li class="page-item first disabled"><a href="#" class="page-link">首页</a></li>
                     <li class="page-item prev disabled"><a href="#" class="page-link">上一页</a></li>
                     <li class="page-item active"><a href="#" class="page-link">1</a></li>
@@ -268,8 +277,12 @@
             window.parent.setMenu(1, 1);
         })
     </script>
+    <script src="./tools/config.js"></script>
+    <script src="./tools/articles.js"></script>
+    <!-- 引入分页器关联的js文件 -->
+    <script src="./js/jquery.twbsPagination.js"></script>
     <!-- --------------获取文章列表功能------------ -->
-    <!-- ---------配置template模板----- -->
+    <!-- ---------------配置template模板(表格结构创建)---------- -->
     <script src="./js/template-web.js"></script>
     <script id="temp2" type="text/template">
         {{each data val}}
@@ -287,19 +300,108 @@
     {{/each}}
     </script>
 
+    <!-- 设置template模板(文章类别筛选按钮option的结构创建) -->
+    <script id="temp3" type="text/template">
+    {{each data val}}
+    <option value="{{val.id}}">{{val.name}}</option>
+    {{/each}}
+    </script>
+
     <script>
-        // 1 页面刷新时发送ajax请求,获取数据,展示到tbody中
-        $.ajax({
-            url: 'http://localhost:8000/admin/search',
+        // 1 页面刷新时发送ajax请求,获取数据,展示到tbody中(封装函数并调用)
+        var page = 1;//保存每次点击[页数的页码
+        var lastTotalPage = 0;//保存每次重新配置分页器时,上一次的点击页数
+
+        //页面刷新时调用函数,渲染表格结构
+        getAtic();
+
+        //页面刷新时调用[获取文章分类]的方法,获取文章的分类,用template模板渲染下拉菜单选项
+        articles.getCate({
             success: function (res) {
-                if (res.code === 200) {
-                    // 3 获取响应成功调用template函数获取字符串
-                    // 4 把字符串放到tbody中
-                    var temp_str = template('temp2', res);
-                    $('tbody').html(temp_str);
-                }
+                // console.log(res);
+
+                // - 通过模板引擎进行结构创建,不能用html(),否则会覆盖掉[所有选项]
+                $('#selCategory').append(template('temp3', res));
             }
+        });
+
+        // -----给筛选按钮注册点击事件
+        $('#btnSearch').on('click', function () {
+            //每次筛选,获取表单元素,请求数据,渲染页面,调用函数
+            getAtic();
+
+            // 为了避免筛选时，两次结果的总页数相同，页码不会更新
+            //   - 自己手动触发首页按钮点击事件即可，first类名是插件自己添加的
+            $('.first').click();
+
         })
+
+        //刷新页面时,传入参数为(页数1,分类:空,slug:空)
+        //点击[查询]按钮时,也要触发该函数
+        //点击[页码]按钮时,也要触发该函数
+        //该函数负责发送ajax,请求,获取数据,数据获取后,把对应的内容展示到页面中,把[总页数]给到分页器,每次传回一个页面(6条)即可
+        function getAtic() {
+            $.ajax({
+
+                url: 'http://localhost:8000/admin/search',
+                //修改发送的参数,包含页数,分类和状态,用全局变量page,表示本次请求的总页数,点击查询按钮也要触发该函数
+                data: { page: page, type: $('#selCategory').val(), state: $('#selStatus').val() },
+                success: function (res) {
+                    if (res.code === 200) {
+                        // console.log(res);
+
+                        // 3 获取响应成功调用template函数获取字符串
+                        // 4 把字符串放到tbody中
+                        var temp_str = template('temp2', res);
+                        $('tbody').html(temp_str);
+
+                        // 需要在重新生成分页结构前进行检测，如果总页数与上次相同，没必要重新创建了,但是上次的页数,需要用全局变量保存起来
+                        if (res.totalPage === lastTotalPage) {
+                            return;
+                        }
+
+                        // 每次重置分页结构时，记录上一次的总页数
+                        lastTotalPage = res.totalPage;
+
+
+                        //每次获取数据,都需要重新配置分页器,先把原来的分页器结构删除
+                        $('#pagination-demo').twbsPagination('destroy');
+
+
+                        //设置分页器及其点击跳转到指定页面功能
+                        //每次设置[设置跳转功能],分页器会自动默认点击[首页],改跳转函数内部由设置了新的分页器,所以又自动触发点击首页的事件,像递归函数一样,不端的触发点击首页的事件
+                        $('#pagination-demo').twbsPagination({
+                            //totalpages总记录数，就是多少条数据,这是后台响应的时候就带过来的
+                            totalPages: res.totalPage,
+                            visiblePages: 5,
+                            first: '首页',
+                            last: '末页',
+                            prev: '上一页',
+                            next: '下一页',
+                            // href: "?p={{number}}",
+                            onPageClick: function (e, currentPage) {
+                                page = currentPage;
+                                console.log(currentPage);
+                                getAtic();
+                            }
+                        });
+                    }
+                }
+            })
+        }
+
+
+        // $.ajax({
+        //     url: 'http://localhost:8000/admin/search',
+        //     success: function (res) {
+        //         if (res.code === 200) {
+        //             // 3 获取响应成功调用template函数获取字符串
+        //             // 4 把字符串放到tbody中
+        //             var temp_str = template('temp2', res);
+        //             $('tbody').html(temp_str);
+        //         }
+        //     }
+        // })
     </script>
 
 </body>

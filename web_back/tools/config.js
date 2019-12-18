@@ -16,3 +16,7 @@ var GETCATE = BASE_URL + 'admin/category_search';//文章分类获取
 var ADDCATE = BASE_URL + 'admin/category_add';//新增文章分类
 var EDITCATE = BASE_URL + 'admin/category_edit';//编辑文章分类
 var DELCATE = BASE_URL + 'admin/category_delete';//删除文章分类
+
+
+
+var GETATIC = BASE_URL + 'admin/search';//删除文章分类

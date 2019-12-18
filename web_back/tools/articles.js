@@ -57,6 +57,20 @@ var articles = {
                 }
             }
         })
-    }
+    },
+
+    //-----------------------------------------------------
+    //文章列表展示
+    // getAtic: function (options) {
+    //     $.ajax({
+    //         data: options.data,
+    //         url: GETATIC,
+    //         success: function (res) {
+    //             if (res.code === 200) {
+    //                 options.success(res);
+    //             }
+    //         }
+    //     })
+    // }
 
 }
